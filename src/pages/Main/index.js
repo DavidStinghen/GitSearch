@@ -3,6 +3,7 @@ import { FaGithubAlt, FaPlus, FaSpinner } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 import api from '../../services/api';
+
 import Container from '../../components/Container';
 import { Form, SubmitButton, List } from './styles';
 
@@ -40,17 +41,19 @@ export default class Main extends Component {
   // get repositories
   handleSubmit = async e => {
     e.preventDefault();
+
     this.setState({ loading: true, error: false });
 
     try {
       const { newRepo, repositories } = this.state;
 
       // check field is empty
-      if (newRepo === '') throw 'Você deve indicar um repositório';
+      if (newRepo === '') throw 'Você precisa indicar um repositório';
 
       // check if repository alredy exists
-      const Repo = repositories.find(r => r.name === newRepo);
-      if (Repo) throw 'Repository alredy exists';
+      const hasRepo = repositories.find(r => r.name === newRepo);
+
+      if (hasRepo) throw 'Repositório duplicado';
 
       const response = await api.get(`/repos/${newRepo}`);
 
@@ -66,7 +69,7 @@ export default class Main extends Component {
     } catch (error) {
       this.setState({ error: true });
     } finally {
-      this.setState({ loading: true });
+      this.setState({ loading: false });
     }
   };
 
