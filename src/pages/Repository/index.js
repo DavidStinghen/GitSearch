@@ -7,7 +7,6 @@ import Container from '../../components/Container';
 import { Loading, Owner, IssueList, IssueFilter, PageActions } from './styles';
 
 export default class Repository extends Component {
-  // data validation
   static propTypes = {
     match: PropTypes.shape({
       params: PropTypes.shape({
@@ -29,7 +28,6 @@ export default class Repository extends Component {
     page: 1,
   };
 
-  // load repository and issue
   async componentDidMount() {
     const { match } = this.props;
     const { filters } = this.state;
@@ -38,7 +36,7 @@ export default class Repository extends Component {
 
     const [repository, issues] = await Promise.all([
       api.get(`/repos/${repoName}`),
-      api.get(`repos/${repoName}/issues`, {
+      api.get(`/repos/${repoName}/issues`, {
         params: {
           state: filters.find(f => f.active).state,
           per_page: 5,
@@ -53,7 +51,6 @@ export default class Repository extends Component {
     });
   }
 
-  // load filter issues
   loadIssues = async () => {
     const { match } = this.props;
     const { filters, filterIndex, page } = this.state;
@@ -71,13 +68,11 @@ export default class Repository extends Component {
     this.setState({ issues: response.data });
   };
 
-  // load filter
   handleFilterClick = async filterIndex => {
     await this.setState({ filterIndex });
     this.loadIssues();
   };
 
-  // step to next page
   handlePage = async action => {
     const { page } = this.state;
     await this.setState({
@@ -89,15 +84,15 @@ export default class Repository extends Component {
   render() {
     const {
       repository,
-      issues,
       loading,
+      issues,
       filters,
       filterIndex,
       page,
     } = this.state;
 
     if (loading) {
-      return <Loading />;
+      return <Loading>Carregando</Loading>;
     }
 
     return (
