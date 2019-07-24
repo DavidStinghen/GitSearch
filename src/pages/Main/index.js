@@ -11,6 +11,7 @@ export default class Main extends Component {
     newRepo: '',
     repositories: [],
     loading: false,
+    error: null,
   };
 
   // load localStorage data
@@ -33,30 +34,44 @@ export default class Main extends Component {
 
   // get value of field
   handleInputChange = e => {
-    this.setState({ newRepo: e.target.value });
+    this.setState({ newRepo: e.target.value, error: null });
   };
 
   // get repositories
   handleSubmit = async e => {
     e.preventDefault();
-    this.setState({ loading: true });
-    const { newRepo, repositories } = this.state;
-    const response = await api.get(`/repos/${newRepo}`);
+    this.setState({ loading: true, error: false });
 
-    // storage repositories
-    const data = {
-      name: response.data.full_name,
-    };
+    try {
+      const { newRepo, repositories } = this.state;
 
-    this.setState({
-      repositories: [...repositories, data],
-      newRepo: '',
-      loading: false,
-    });
+      // check field is empty
+      if (newRepo === '') throw 'Você deve indicar um repositório';
+
+      // check if repository alredy exists
+      const Repo = repositories.find(r => r.name === newRepo);
+      if (Repo) throw 'Repository alredy exists';
+
+      const response = await api.get(`/repos/${newRepo}`);
+
+      // storage repositories
+      const data = {
+        name: response.data.full_name,
+      };
+
+      this.setState({
+        repositories: [...repositories, data],
+        newRepo: '',
+      });
+    } catch (error) {
+      this.setState({ error: true });
+    } finally {
+      this.setState({ loading: true });
+    }
   };
 
   render() {
-    const { newRepo, loading, repositories } = this.state;
+    const { newRepo, repositories, loading, error } = this.state;
 
     return (
       <Container>
@@ -65,7 +80,7 @@ export default class Main extends Component {
           Repositórios
         </h1>
 
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} error={error}>
           <input
             type="text"
             placeholder="Adicionar repositório"
@@ -75,9 +90,9 @@ export default class Main extends Component {
 
           <SubmitButton loading={loading}>
             {loading ? (
-              <FaSpinner color="#fff" size="14" />
+              <FaSpinner color="#FFF" size={14} />
             ) : (
-              <FaPlus color="#fff" size={14} />
+              <FaPlus color="#FFF" size={14} />
             )}
           </SubmitButton>
         </Form>
